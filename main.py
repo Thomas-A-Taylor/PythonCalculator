@@ -9,101 +9,175 @@ finalNumButtons = []
 window = tk.Tk()
 topTextText = tk.StringVar()
 bottomTextText = tk.StringVar()
+numberStack = []
+operatorStack = []
+
+
+# button helper functions
+def operatorToStack():
+    # add the last character to operator stack
+    operatorStack.append(bottomTextText.get()[-1])
+
+
+def numberToStack():
+    if not bottomTextText.get()[-1].isnumeric():
+        numberStack.append(float(bottomTextText.get()[:-1]))
+    else:
+        numberStack.append(float(bottomTextText.get()))
+
+
+def addToTop():
+    topTextText.set(topTextText.get() + bottomTextText.get())
+    bottomTextText.set("")
+
+
+def moveToTop():
+    topTextText.set(bottomTextText.get())
+    bottomTextText.set("")
+
+
+def isNumStackEmpty():
+    return len(numberStack) == 0
+
+
+def addMoveTop(empty):
+    if empty:
+        moveToTop()
+    else:
+        addToTop()
 
 
 # button functions
 def zero():
-    topTextText.set(topTextText.get() + "0")
+    bottomTextText.set(bottomTextText.get() + "0")
 
 
 def one():
-    topTextText.set(topTextText.get() + "1")
+    bottomTextText.set(bottomTextText.get() + "1")
 
 
 def two():
-    topTextText.set(topTextText.get() + "2")
+    bottomTextText.set(bottomTextText.get() + "2")
 
 
 def three():
-    topTextText.set(topTextText.get() + "3")
+    bottomTextText.set(bottomTextText.get() + "3")
 
 
 def four():
-    topTextText.set(topTextText.get() + "4")
+    bottomTextText.set(bottomTextText.get() + "4")
 
 
 def five():
-    topTextText.set(topTextText.get() + "5")
+    bottomTextText.set(bottomTextText.get() + "5")
 
 
 def six():
-    topTextText.set(topTextText.get() + "6")
+    bottomTextText.set(bottomTextText.get() + "6")
 
 
 def seven():
-    topTextText.set(topTextText.get() + "7")
+    bottomTextText.set(bottomTextText.get() + "7")
 
 
 def eight():
-    topTextText.set(topTextText.get() + "8")
+    bottomTextText.set(bottomTextText.get() + "8")
 
 
 def nine():
-    topTextText.set(topTextText.get() + "9")
+    bottomTextText.set(bottomTextText.get() + "9")
 
 
 def percent():
-    topTextText.set(topTextText.get() + "%")
-    if topTextText.get() == "%":
-        bottomTextText.set("ERROR")
+    bottomTextText.set(bottomTextText.get() + "%")
+    if bottomTextText.get() == "%":
+        topTextText.set("ERROR")
 
 
 def decimal():
-    # NEEDS UPDATING TO NOT ALLOW MULTIPLE DECIMALS IN A SINGLE NUMBER
-    if topTextText.get().count(".") == 0:
-        topTextText.set(topTextText.get() + ".")
+    if not bottomTextText.get() == "-" and not bottomTextText.get() == "":
+        if bottomTextText.get().count(".") == 0:
+            bottomTextText.set(bottomTextText.get() + ".")
 
 
 def add():
-    if topTextText.get()[-1].isnumeric():
-        topTextText.set(topTextText.get() + "+")
-    else:
-        topTextText.set(topTextText.get()[:-1] + "+")
+    if not bottomTextText.get() == "-" and not bottomTextText.get() == "":
+        if bottomTextText.get()[-1].isnumeric():
+            bottomTextText.set(bottomTextText.get() + "+")
+            empty = isNumStackEmpty()
+            operatorToStack()
+            numberToStack()
+            addMoveTop(empty)
 
 
 def subtract():
-    if topTextText.get()[-1].isnumeric():
-        topTextText.set(topTextText.get() + "-")
+    if bottomTextText.get() == "":
+        bottomTextText.set("-")
     else:
-        topTextText.set(topTextText.get()[:-1] + "-")
+        if bottomTextText.get()[-1].isnumeric():
+            bottomTextText.set(bottomTextText.get() + "-")
+            empty = isNumStackEmpty()
+            operatorToStack()
+            numberToStack()
+            addMoveTop(empty)
 
 
 def divide():
-    if topTextText.get()[-1].isnumeric():
-        topTextText.set(topTextText.get() + "/")
-    else:
-        topTextText.set(topTextText.get()[:-1] + "/")
+    if not bottomTextText.get() == "-" and not bottomTextText.get() == "":
+        if bottomTextText.get()[-1].isnumeric():
+            bottomTextText.set(bottomTextText.get() + "/")
+            empty = isNumStackEmpty()
+            operatorToStack()
+            numberToStack()
+            addMoveTop(empty)
 
 
 def multiply():
-    if topTextText.get()[-1].isnumeric():
-        topTextText.set(topTextText.get() + "*")
-    else:
-        topTextText.set(topTextText.get()[:-1] + "*")
+    if not bottomTextText.get() == "-" and not bottomTextText.get() == "":
+        if bottomTextText.get()[-1].isnumeric():
+            bottomTextText.set(bottomTextText.get() + "*")
+            empty = isNumStackEmpty()
+            operatorToStack()
+            numberToStack()
+            addMoveTop(empty)
 
 
 def delete():
-    topTextText.set(topTextText.get()[:-1])
+    bottomTextText.set(bottomTextText.get()[:-1])
 
 
 def reset():
-    print('reset')
     topTextText.set("")
     bottomTextText.set("")
+    operatorStack.clear()
+    numberStack.clear()
 
 
 def equals():
-    print('=')
+    if len(numberStack) > 0 and not bottomTextText.get() == "":
+        numberToStack()
+        addToTop()
+        while len(operatorStack) > 0:
+            case = operatorStack.pop()
+            match case:
+                case "-":
+                    second = numberStack.pop()
+                    first = numberStack.pop()
+                    numberStack.append(first - second)
+                case "+":
+                    second = numberStack.pop()
+                    first = numberStack.pop()
+                    numberStack.append(first + second)
+                case "/":
+                    second = numberStack.pop()
+                    first = numberStack.pop()
+                    numberStack.append(first / second)
+                case "*":
+                    second = numberStack.pop()
+                    first = numberStack.pop()
+                    numberStack.append(first * second)
+
+        bottomTextText.set(str(numberStack.pop()))
 
 
 # CREATE GUI
